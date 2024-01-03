@@ -15,9 +15,6 @@ import {
   updateCard,
   updateDeck,
 } from "../utils/api";
-//added by me
-import { Provider } from 'react-redux';
-import store from '../app/store';
 
 require("cross-fetch/polyfill");
 
@@ -70,9 +67,7 @@ describe("App", () => {
     history.push("/some/bad/route");
     render(
       <Router history={history}>
-        <Provider store={store}>
-          <App />
-        </Provider>
+        <App />
       </Router>
     );
     expect(screen.getByText("Not Found")).toBeTruthy();
@@ -101,9 +96,7 @@ describe("App", () => {
     const history = createMemoryHistory();
     render(
       <Router history={history}>
-        <Provider store={store}>
-          <App />
-        </Provider>
+        <App />
       </Router>
     );
 

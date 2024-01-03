@@ -14,12 +14,8 @@ import {
   readDeck,
   updateCard,
   updateDeck,
-  listCardsByDeck
 } from "../utils/api";
 import userEvent from "@testing-library/user-event";
-//added by me
-import { Provider } from 'react-redux';
-import store from '../app/store';
 
 require("cross-fetch/polyfill");
 
@@ -65,10 +61,6 @@ describe("Decks", () => {
       name:
         "Default mock response. If you see this, you probably do not need this API call.",
     });
-    listCardsByDeck.mockResolvedValue({
-      name:
-        "Default mock response. If you see this, you probably do not need this API call.",
-    });
   });
 
   test("route for /decks/:deckId", async () => {
@@ -87,15 +79,12 @@ describe("Decks", () => {
     };
 
     readDeck.mockResolvedValue(mockDeck);
-    listCardsByDeck.mockResolvedValue(mockDeck.cards);
 
     const history = createMemoryHistory();
     history.push("/decks/3");
     render(
       <Router history={history}>
-        <Provider store={store}>
-          <App />
-        </Provider>
+        <App />
       </Router>
     );
 
@@ -111,9 +100,7 @@ describe("Decks", () => {
     history.push("/decks/new");
     const { container } = render(
       <Router history={history}>
-        <Provider store={store}>
-          <App />
-        </Provider>
+        <App />
       </Router>
     );
 
@@ -141,9 +128,7 @@ describe("Decks", () => {
     history.push("/decks/33/edit");
     render(
       <Router history={history}>
-        <Provider store={store}>
-          <App />
-        </Provider>
+        <App />
       </Router>
     );
 
@@ -168,9 +153,7 @@ describe("Decks", () => {
     history.push("/decks/4/cards/new");
     const { container } = render(
       <Router history={history}>
-        <Provider store={store}>
-          <App />
-        </Provider>
+        <App />
       </Router>
     );
 
@@ -215,9 +198,7 @@ describe("Decks", () => {
     history.push("/decks/9/cards/10/edit");
     render(
       <Router history={history}>
-        <Provider store={store}>
-          <App />
-        </Provider>
+        <App />
       </Router>
     );
 
@@ -260,9 +241,7 @@ describe("Decks", () => {
     history.push("/decks/42/study");
     render(
       <Router history={history}>
-        <Provider store={store}>
-          <App />
-        </Provider>
+        <App />
       </Router>
     );
 
@@ -312,9 +291,7 @@ describe("Decks", () => {
     history.push("/decks/73/study");
     render(
       <Router history={history}>
-        <Provider store={store}>
-          <App />
-        </Provider>
+        <App />
       </Router>
     );
 
@@ -341,9 +318,7 @@ describe("Decks", () => {
     history.push("/decks/13/study");
     render(
       <Router history={history}>
-        <Provider store={store}>
-          <App />
-        </Provider>
+        <App />
       </Router>
     );
 
