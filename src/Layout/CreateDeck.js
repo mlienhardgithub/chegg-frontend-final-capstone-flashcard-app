@@ -7,12 +7,6 @@ import Header from "./Header";
 export default function CreateDeck() {
   const decks = useSelector(selectAllDecks); //get redux slice of decks in state
   console.log('routeMatchOutput', useRouteMatch());
-  /*
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const handleNameChange = (event) => setName(event.target.value);
-  const handleDescriptionChange = (event) => setDescription(event.target.value);
-  */
   const dispatch = useDispatch();
   const history = useHistory();
 

@@ -53,18 +53,7 @@ export default function EditCard() {
         loadCard(cardId);
     }, [dispatch]);
 
-    //using this because the data is accurate and faster than using the API calls
-    //const deckCard = deck.cards.find((card) => Number(cardId) === Number(card.id));
-    //console.log('EditCard deckCard:', deckCard);
-    console.log('EditCard card:', card);
-
-    //using the card from the deck, because the API call takes to long to load, and only intermittenly updates the default values
-    /*
-    const [front, setFront] = useState((deckCard === undefined) ? card.front : deckCard.front);
-    const [back, setBack] = useState((deckCard === undefined) ? card.back : deckCard.back);
-    const handleFrontChange = (event) => setFront(event.target.value);
-    const handleBackChange = (event) => setBack(event.target.value);
-    */
+    console.log('card:', card);
 
     const initialFormState = {
         front: card?.front || '',
