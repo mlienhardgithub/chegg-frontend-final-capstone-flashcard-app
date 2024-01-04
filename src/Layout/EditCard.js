@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Link, useHistory, useParams, useRouteMatch, Redirect } from "react-router-dom";
+import { useHistory, useParams, useRouteMatch, Redirect } from "react-router-dom";
 import { readDeck, readCard, updateCard } from "../utils/api/index";
-import Loading from "./Loading";
+import CardForm from "./CardForm";
 
 export default function EditCard() {
     console.log('EditCard routeMatchOutput', useRouteMatch());
@@ -103,71 +103,19 @@ export default function EditCard() {
 
     function handleCancel() {
         history.push(`/decks/${deck.id}`);
+        //<Redirect to="/"/>
     }
 
-    let render;
-        if (deck.id) { //if a deck is returned
-            render = (
-                <>
-                    <nav aria-label="breadcrumb">
-                        <ol className="breadcrumb">
-                            <li className="breadcrumb-item">
-                                <i className="bi bi-house-fill"></i>
-                                <Link to="/">Home</Link>
-                            </li>
-                            <li className="breadcrumb-item">
-                                <Link to={`/decks/${deck.id}`}>Deck {deck.name}</Link>
-                            </li>
-                            <li
-                                className="breadcrumb-item active" 
-                                aria-current="page">
-                                Edit Card {cardId}
-                            </li>
-                        </ol>
-                    </nav>
-                    <h2 className="card-title">
-                        {deck.name}: Edit Card
-                    </h2>
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                        <label htmlFor="front">Front: </label>
-                        <textarea
-                            id="front"
-                            type="text"
-                            name="front"
-                            onChange={handleChange}
-                            placeholder="Front side of card"
-                            value={formData.front}
-                            required={true}
-                            rows={3}
-                            className="form-control" 
-                        />
-                        </div>
-                        <div className="form-group">
-                        <label htmlFor="back">Back: </label>
-                        <textarea
-                            id="back"
-                            type="text"
-                            name="back"
-                            onChange={handleChange}
-                            placeholder="Back side of card"
-                            value={formData.back}
-                            required={true}
-                            rows={3}
-                            className="form-control" 
-                        />
-                        </div>
-                        <div className="btn-group" role="group">
-                        <button type="reset" onClick={handleCancel} className="btn btn-secondary">Cancel</button>
-                        &nbsp;
-                        <button type="submit" className="btn btn-primary">Submit</button>
-                        </div>
-                    </form>
-                </>
-            );
-        } else { //if no deck is found
-            render = <Loading />;
-        }
-
-    return (<>{render}</>);
+    return (
+        <CardForm
+            title={"Edit Card"}
+            cardId={cardId}
+            deck={deck}
+            front={formData.front}
+            back={formData.back}
+            handleSubmit={handleSubmit} 
+            handleChange={handleChange}
+            handleCancel={handleCancel}
+        />
+    );
 }

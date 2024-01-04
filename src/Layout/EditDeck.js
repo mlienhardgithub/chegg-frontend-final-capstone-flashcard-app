@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useHistory, useParams, useRouteMatch, Redirect } from "react-router-dom";
 import { readDeck, updateDeck } from "../utils/api/index";
 import Loading from "./Loading";
+import DeckForm from "./DeckForm";
 
 export default function EditDeck() {
     console.log('routeMatchOutput', useRouteMatch());
@@ -101,40 +102,13 @@ export default function EditDeck() {
                     <h2 className="card-title">
                         Edit Deck
                     </h2>
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                        <label htmlFor="name">Name: </label>
-                        <input
-                            id="name"
-                            type="text"
-                            name="name"
-                            onChange={handleChange}
-                            placeholder="Deck Name"
-                            value={formData.name}
-                            required={true}
-                            className="form-control" 
-                        />
-                        </div>
-                        <div className="form-group">
-                        <label htmlFor="description">Description: </label>
-                        <textarea
-                            id="description"
-                            type="text"
-                            name="description"
-                            onChange={handleChange}
-                            placeholder="Brief description of the deck"
-                            value={formData.description}
-                            required={true}
-                            rows={3} 
-                            className="form-control" 
-                        />
-                        </div>
-                        <div className="btn-group" role="group">
-                        <button type="reset" onClick={handleCancel} className="btn btn-secondary">Cancel</button>
-                        &nbsp;
-                        <button type="submit" className="btn btn-primary">Submit</button>
-                        </div>
-                    </form>
+                    <DeckForm
+                        name={formData.name}
+                        description={formData.description}
+                        handleSubmit={handleSubmit}
+                        handleChange={handleChange}
+                        handleCancel={handleCancel}
+                    />
                 </>
             );
         } else { //if no deck is found
