@@ -1,61 +1,58 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState } from "react";
 import { Link, NavLink, useHistory, useParams, useRouteMatch } from "react-router-dom";
-import {
-    removeDeck
-} from './decks.slice';
-import {
-    fetchDeck,
-    selectDeck,
-    selectDeckLoading,
-    selectDeckError
-} from './deck.slice';
-import ErrorMessage from "./ErrorMessage";
+import { readDeck, deleteDeck } from "../utils/api/index";
 import Loading from "./Loading";
 import CardList from "./CardList";
 
 export default function Deck() {
-    const deck = useSelector(selectDeck); //get redux deck slice in state
+    const [deck, setDeck] = useState({});
     const { deckId } = useParams(); //the deck id
     console.log('Deck deckId', deckId);
     const { url, path } = useRouteMatch();
     console.log('Deck routeMatchOutput', useRouteMatch());
-    const loading = useSelector(selectDeckLoading);
-    const error = useSelector(selectDeckError);
-    const dispatch = useDispatch();
     const history = useHistory();
 
     /* Adding this in per requirement:
     You must use the readDeck() function from src/utils/api/index.js to load the existing deck.
     */
-
-    useEffect(() => { //get redux deck slice in state
+    useEffect(() => {
+        setDeck({});
         async function loadDeck(id) {
-          await dispatch(fetchDeck(id));
+            const abortController = new AbortController();
+            try {
+                const response = await readDeck(id, abortController.signal)
+                console.log('response:', response);
+                setDeck(response);
+            } catch(error) {
+                console.log('error:', error);
+                abortController.abort(); // Cancels any pending request or response
+            }
         }
         loadDeck(deckId);
-    }, [dispatch]);
+    }, []); // Passing [] so that it only runs the effect once
 
     console.log('deck:', deck);
     
     function handleDelete(id) {
         const result = window.confirm("Delete this deck? \nYou will not be able to recover it.");
         if (result) {
-            async function remove() {
-                const response = await dispatch(removeDeck(id));
-                console.log('Deck delete response:', response);
-                history.push("/");
-            };
-            remove();
+            async function removeDeck() {
+                const abortController = new AbortController();
+                try {
+                    const response = await deleteDeck(id, abortController.signal)
+                    console.log('Deck delete response:', response);
+                } catch(error) {
+                    console.log('error:', error);
+                    abortController.abort(); // Cancels any pending request or response
+                }
+            }
+            removeDeck();
+            history.push("/"); // go to home page
+            history.go(0); // re-render the home page
         }
     }
 
     let render;
-    if (loading) { //while loading data from API
-        render = <Loading />;
-    } else if (error) { //if error
-        render = <ErrorMessage error={error} />;
-    } else {
         if (deck.id) { //if a deck is returned
             render = (
                 <>
@@ -106,7 +103,6 @@ export default function Deck() {
         } else { //if no deck is found
             render = <Loading />;
         }
-    }
 
     return (<>{render}</>);
 };

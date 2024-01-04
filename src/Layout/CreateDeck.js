@@ -1,13 +1,9 @@
 import React, {useState} from "react";
 import { Link, useHistory, useRouteMatch, Redirect } from "react-router-dom";
-import { useDispatch, useSelector } from 'react-redux';
-import { addDeck, selectAllDecks } from './decks.slice';
-import Header from "./Header";
+import { createDeck } from "../utils/api/index";
 
 export default function CreateDeck() {
-  const decks = useSelector(selectAllDecks); //get redux slice of decks in state
   console.log('routeMatchOutput', useRouteMatch());
-  const dispatch = useDispatch();
   const history = useHistory();
 
   const initialFormState = {
@@ -25,16 +21,22 @@ export default function CreateDeck() {
 
   function handleSubmit(event) {
       event.preventDefault();
-      async function createDeck() {
-          console.log("Submitting: ", formData.name, formData.description);
-          const name = formData.name;
-          const description = formData.description;
-          const payload = {name, description}; //package payload parameters
-          const response = await dispatch(addDeck(payload));
-          console.log('CreateDeck response.payload.id:', response.payload.id);
-          history.push(`/decks/${response.payload.id}`);
+      async function addDeck() {
+          const abortController = new AbortController();
+          try {
+              console.log("Submitting: ", formData.name, formData.description);
+              const name = formData.name;
+              const description = formData.description;
+              const payload = {name, description}; //package payload parameters
+              const response = await createDeck(payload, abortController.signal)
+              console.log('CreateDeck response.id:', response.id);
+              history.push(`/decks/${response.id}`);
+          } catch(error) {
+              console.log('error:', error);
+              abortController.abort(); // Cancels any pending request or response
+          }
       }
-      createDeck();
+      addDeck();
   }
 
   function handleCancel() {
@@ -44,7 +46,6 @@ export default function CreateDeck() {
 
   return (
     <>
-      <Header />
       <main className="container">
         <div className="card">
           <div className="card-body">

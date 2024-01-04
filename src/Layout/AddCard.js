@@ -1,30 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link, useHistory, useParams, useRouteMatch, useLocation, Redirect } from "react-router-dom";
-import { useDispatch, useSelector } from 'react-redux';
-import {
-    fetchDeck,
-    addCard,
-    selectDeck,
-    selectDeckLoading,
-    selectDeckError
-} from './deck.slice';
-import ErrorMessage from "./ErrorMessage";
+import { readDeck, createCard } from "../utils/api/index";
 import Loading from "./Loading";
 
 export default function AddCard() {
     console.log('AddCard routeMatchOutput', useRouteMatch());
-    const deck = useSelector(selectDeck); //get redux deck slice in state
+    const [deck, setDeck] = useState({});
     const { deckId } = useParams(); //the deck id
     console.log('deckId', deckId);
-    /*
-    const [front, setFront] = useState("");
-    const [back, setBack] = useState("");
-    const handleFrontChange = (event) => setFront(event.target.value);
-    const handleBackChange = (event) => setBack(event.target.value);
-    */
-    const loading = useSelector(selectDeckLoading);
-    const error = useSelector(selectDeckError);
-    const dispatch = useDispatch();
     const history = useHistory();
     const location = useLocation();
     console.log('location:', location);
@@ -32,12 +15,21 @@ export default function AddCard() {
     /* Adding this in per requirement:
     You must use the readDeck() function from src/utils/api/index.js to load the deck that you're adding the card to.
     */
-    useEffect(() => { //get redux deck slice in state
+    useEffect(() => {
+        setDeck({});
         async function loadDeck(id) {
-          await dispatch(fetchDeck(id));
+            const abortController = new AbortController();
+            try {
+                const response = await readDeck(id, abortController.signal)
+                console.log('response:', response);
+                setDeck(response);
+            } catch(error) {
+                console.log('error:', error);
+                abortController.abort(); // Cancels any pending request or response
+            }
         }
         loadDeck(deckId);
-    }, [dispatch]);
+    }, []); // Passing [] so that it only runs the effect once
     
     console.log('deck:', deck);
 
@@ -54,21 +46,28 @@ export default function AddCard() {
         });
     };
 
+    /* test with
+    curl -X POST --data "front=junk&back=trash&deckId=3" http://localhost:8080/cards
+    */
     function handleSubmit(event) {
         event.preventDefault();
-        console.log("Submitted: ", formData.front, formData.back);
-        async function createCard() {
-            const deckId = deck.id;
-            console.log("Submitting: ", deckId, formData.front, formData.back);
-            const front = formData.front;
-            const back = formData.back;
-            const payload = {deckId, front, back}; //package payload parameters
-            const response = await dispatch(addCard(payload));
-            console.log('AddCard response.payload.id:', response.payload.id);
-            setFormData({ ...initialFormState });
-            history.push(location);
+        async function addCard() {
+            const abortController = new AbortController();
+            try {
+                const deckId = deck.id;
+                console.log("Submitting: ", deckId, formData.front, formData.back);
+                const front = formData.front;
+                const back = formData.back;
+                const response = await createCard(deckId, {front, back}, abortController.signal)
+                console.log('AddCard response:', response);
+            } catch(error) {
+                console.log('error:', error);
+                abortController.abort(); // Cancels any pending request or response
+            }
         }
-        createCard();
+        addCard();
+        setFormData({ ...initialFormState });
+        history.push(location);
     }
 
     function handleCancel() {
@@ -77,11 +76,6 @@ export default function AddCard() {
     }
 
     let render;
-    if (loading) { //while loading data from API
-        render = <Loading />;
-    } else if (error) { //if error
-        render = <ErrorMessage error={error} />;
-    } else {
         if (deck.id) { //if a deck is returned
             render = (
                 <>
@@ -144,7 +138,6 @@ export default function AddCard() {
         } else { //if no deck is found
             render = <Loading />;
         }
-    }
 
     return (<>{render}</>);
 }

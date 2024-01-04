@@ -1,43 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { Link, useHistory, useParams, useRouteMatch, Redirect } from "react-router-dom";
-import { useDispatch, useSelector } from 'react-redux';
-import {
-    fetchDeck,
-    selectDeck,
-    selectDeckLoading,
-    selectDeckError
-} from './deck.slice';
-import {
-    fetchCard, editCard, selectCard, selectCardLoading, selectCardError
-} from './card.slice';
-import ErrorMessage from "./ErrorMessage";
+import { readDeck, readCard, updateCard } from "../utils/api/index";
 import Loading from "./Loading";
 
 export default function EditCard() {
     console.log('EditCard routeMatchOutput', useRouteMatch());
-    const deck = useSelector(selectDeck); //get redux deck slice in state
-    const card = useSelector(selectCard); //get redux deck slice in state
+    const [deck, setDeck] = useState({});
+    const [card, setCard] = useState({});
     const { deckId } = useParams(); //the deck id
     console.log('deckId', deckId);
     const { cardId } = useParams(); //the card id
     console.log('cardId', cardId);
-    
-    const loadingDeck = useSelector(selectDeckLoading);
-    const errorDeck = useSelector(selectDeckError);
-    const loadingCard = useSelector(selectCardLoading);
-    const errorCard = useSelector(selectCardError);
-    const dispatch = useDispatch();
     const history = useHistory();
 
     /* Adding this in per requirement:
     You must use the readDeck() function from src/utils/api/index.js to load the deck that contains the card to be edited.
     */
-    useEffect(() => { //get redux deck slice in state
+    useEffect(() => {
+        setDeck({});
         async function loadDeck(id) {
-          await dispatch(fetchDeck(id));
+            const abortController = new AbortController();
+            try {
+                const response = await readDeck(id, abortController.signal)
+                console.log('response:', response);
+                setDeck(response);
+            } catch(error) {
+                console.log('error:', error);
+                abortController.abort(); // Cancels any pending request or response
+            }
         }
         loadDeck(deckId);
-    }, [dispatch]);
+    }, []); // Passing [] so that it only runs the effect once
 
     //const deck = decks.find((deck) => Number(deckId) === Number(deck.id));
     console.log('deck:', deck);
@@ -45,13 +38,21 @@ export default function EditCard() {
     /* Adding this in per requirement:
     Additionally, you must use the readCard() function from src/utils/api/index.js to load the card that you want to edit.
     */
-
-    useEffect(() => { //get redux deck slice in state
+    useEffect(() => {
+        setCard({});
         async function loadCard(id) {
-          await dispatch(fetchCard(id));
+            const abortController = new AbortController();
+            try {
+                const response = await readCard(id, abortController.signal)
+                console.log('response:', response);
+                setCard(response);
+            } catch(error) {
+                console.log('error:', error);
+                abortController.abort(); // Cancels any pending request or response
+            }
         }
         loadCard(cardId);
-    }, [dispatch]);
+    }, []); // Passing [] so that it only runs the effect once
 
     console.log('card:', card);
 
@@ -82,16 +83,22 @@ export default function EditCard() {
     */
     function handleSubmit(event) {
         event.preventDefault();
-        async function updateCard(deckId, id) {
-            console.log("Submitting: ", id, formData.front, formData.back);
-            const front = formData.front;
-            const back = formData.back;
-            const payload = {deckId, id, front, back}; //package payload parameters
-            const response = await dispatch(editCard(payload));
-            console.log('EditCard response.payload.id:', response.payload.id);
-            history.push(`/decks/${deck.id}`);
+        async function editCard(deckId, id) {
+            const abortController = new AbortController();
+            try {
+                console.log("Submitting: ", id, formData.front, formData.back);
+                const front = formData.front;
+                const back = formData.back;
+                const payload = {deckId, id, front, back}; //package payload parameters
+                const response = await updateCard(payload, abortController.signal)
+                console.log('EditCard response.id:', response.id);
+                history.push(`/decks/${deck.id}`);
+            } catch(error) {
+                console.log('error:', error);
+                abortController.abort(); // Cancels any pending request or response
+            }
         }
-        updateCard(deck.id, cardId);
+        editCard(deck.id, cardId);
     }
 
     function handleCancel() {
@@ -99,15 +106,6 @@ export default function EditCard() {
     }
 
     let render;
-    if (loadingDeck || loadingCard) { //while loading data from API
-        render = <Loading />;
-    } else if (errorDeck || errorCard) { //if error
-        if (errorDeck) {
-            render = <ErrorMessage error={errorDeck} />;
-        } else {
-            render = <ErrorMessage error={errorCard} />;
-        }
-    } else {
         if (deck.id) { //if a deck is returned
             render = (
                 <>
@@ -170,7 +168,6 @@ export default function EditCard() {
         } else { //if no deck is found
             render = <Loading />;
         }
-    }
 
     return (<>{render}</>);
 }

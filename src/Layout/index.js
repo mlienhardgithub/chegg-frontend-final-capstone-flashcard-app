@@ -3,6 +3,8 @@ import { Route, Switch } from "react-router-dom";
 import Header from "./Header";
 import NotFound from "./NotFound";
 import Home from './Home';
+import CreateDeck from "./CreateDeck";
+import Decks from "./Decks";
 
 function Layout() {
   return (
@@ -13,6 +15,12 @@ function Layout() {
       <Switch>
         <Route exact={true} path="/">
           <Home />
+        </Route>
+        <Route path="/decks/new">
+          <CreateDeck  />
+        </Route>
+        <Route path="/decks/:deckId">
+          <Decks />
         </Route>
         <Route>
           <NotFound />

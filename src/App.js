@@ -1,7 +1,5 @@
 import React from "react";
 import { Route, Switch } from "react-router-dom";
-import { Provider } from 'react-redux';
-import store from './app/store';
 import Layout from "./Layout";
 import "./App.css";
 import NotFound from "./Layout/NotFound";
@@ -17,19 +15,13 @@ function App() {
     <div className="app-routes">
       <Switch>
         <Route exact={true} path="/">
-          <Provider store={store}>
-            <Layout />
-          </Provider>
+          <Layout />
         </Route>
         <Route path="/decks/new">
-          <Provider store={store}>
-            <CreateDeck />
-          </Provider>
+          <Layout />
         </Route>
         <Route path="/decks/:deckId">
-          <Provider store={store}>
-            <Decks />
-          </Provider>
+          <Layout />
         </Route>
         <Route>
           <NotFound />

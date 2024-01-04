@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link, NavLink, useHistory, useParams, useRouteMatch, Redirect } from "react-router-dom";
-import { useDispatch, useSelector } from 'react-redux';
-import {
-    fetchDeck,
-    selectDeck,
-    selectDeckLoading,
-    selectDeckError
-} from './deck.slice';
-import ErrorMessage from "./ErrorMessage";
+import { readDeck } from "../utils/api/index";
 import Loading from "./Loading";
 
 function Study() {
-    const deck = useSelector(selectDeck); //get redux deck slice in state
+    const [deck, setDeck] = useState({});
     //console.log('decks:', decks);
     const { deckId } = useParams(); //the deck id
     //console.log('deckId:', deckId);
@@ -22,23 +15,29 @@ function Study() {
     //console.log('routeMatchOutput', useRouteMatch());
     const { path, url } = useRouteMatch();
     //console.log('path:', path, 'url:', url);
-    const loading = useSelector(selectDeckLoading);
-    const error = useSelector(selectDeckError);
-    const dispatch = useDispatch();
     const history = useHistory();
     //console.log('history:', history);
 
     /* Adding this in per requirement:
     You must use the readDeck() function from src/utils/api/index.js to load the deck that is being studied.
     */
-    useEffect(() => { //get redux deck slice in state
+    useEffect(() => {
+        setDeck({});
         async function loadDeck(id) {
-          await dispatch(fetchDeck(id));
+            const abortController = new AbortController();
+            try {
+                const response = await readDeck(id, abortController.signal)
+                console.log('response:', response);
+                setDeck(response);
+            } catch(error) {
+                console.log('error:', error);
+                abortController.abort(); // Cancels any pending request or response
+            }
         }
         loadDeck(deckId);
-    }, [dispatch]);
+    }, []); // Passing [] so that it only runs the effect once
 
-    //console.log('deck:', deck);
+    console.log('deck:', deck);
 
     const handleNext = () => {
         setFront(true); //flip to the front side of the card
@@ -56,11 +55,6 @@ function Study() {
     };
 
     let render;
-    if (loading) { //while loading data from API
-        render = <Loading />;
-    } else if (error) { //if error
-        render = <ErrorMessage error={error} />;
-    } else {
         if (deck.id) { //if a deck is returned
             let cardLength;
             if ((!Array.isArray(deck.cards)) || (!deck.cards.length)) {
@@ -130,9 +124,7 @@ function Study() {
         } else { //if no deck is found
             render = <Loading />;
         }
-    }
     
     return (<>{render}</>);
-};
-
+}
 export default Study;

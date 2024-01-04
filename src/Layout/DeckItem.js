@@ -1,25 +1,28 @@
 import React from "react";
-import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useHistory } from "react-router-dom";
-import { removeDeck } from './decks.slice';
+import { deleteDeck } from "../utils/api/index";
 import Loading from "./Loading";
 
 export default function DeckItem({deck}) { //props passed down from DeckList
-    console.log('DeckItem deck.id', deck.id);
+    console.log('DeckItem deck:', deck, 'deck.id', deck.id);
     //console.log('DeckItem routeMatchOutput', useRouteMatch());
-    const dispatch = useDispatch();
     const history = useHistory();
-    console.log('deck:', deck);
 
     function handleDelete(id) {
         const result = window.confirm("Delete this deck? \nYou will not be able to recover it.");
         if (result) {
-            async function remove() {
-                const response = await dispatch(removeDeck(id));
-                console.log('DeckItem delete response:', response);
-                history.go(0); // re-render the page
-            };
-            remove();
+            async function removeDeck() {
+                const abortController = new AbortController();
+                try {
+                    const response = await deleteDeck(id, abortController.signal)
+                    console.log('DeckItem delete response:', response);
+                } catch(error) {
+                    console.log('error:', error);
+                    abortController.abort(); // Cancels any pending request or response
+                }
+            }
+            removeDeck();
+            history.go(0); // re-render the page
         }
     }
 

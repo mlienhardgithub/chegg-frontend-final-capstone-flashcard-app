@@ -1,23 +1,28 @@
 import React from "react";
-import { useDispatch } from 'react-redux';
 import { NavLink, useHistory, useParams, useRouteMatch } from "react-router-dom";
-import { removeCard } from './deck.slice';
+import { deleteCard } from "../utils/api";
 
 export default function CardItem({deckId, card}) { //props passed down from DeckList
     console.log('CardItem routeMatchOutput', useRouteMatch());
     const { cardId } = useParams();
-    const dispatch = useDispatch();
     const history = useHistory();
 
     const handleDelete = async (id) => {
         const result = window.confirm("Delete this card? \nYou will not be able to recover it.");
         if (result) {
-            async function remove() {
-                const response = await dispatch(removeCard(id));
-                console.log('DeckItem delete response:', response);
-                history.go(0); // re-render the page
+            async function removeCard() {
+                const abortController = new AbortController();
+                try {
+                    console.log("Submitting: ", id);
+                    const response = await deleteCard(id, abortController.signal)
+                    console.log('CardItem delete response:', response);
+                } catch(error) {
+                    console.log('error:', error);
+                    abortController.abort(); // Cancels any pending request or response
+                }
             };
-            remove();
+            removeCard();
+            history.go(0); // re-render the page
         }
     };
     

@@ -160,7 +160,7 @@ export async function deleteDeck(deckId, signal) {
 export async function createCard(deckId, card, signal) {
   // There is a bug in json-server, if you post to /decks/:deckId/cards the associated deckId is a string
   // and the card is not related to the deck because the data types of the ID's are different.
-  console.log('card:', card);
+  console.log('card:', card, 'deckId', deckId);
   const url = `${API_BASE_URL}/cards`;
   card.deckId = Number(deckId);
   const options = {
@@ -217,6 +217,7 @@ export async function updateCard(updatedCard, signal) {
  *  a promise that resolves to an empty object.
  */
 export async function deleteCard(cardId, signal) {
+  console.log('cardId:', cardId);
   const url = `${API_BASE_URL}/cards/${cardId}`;
   const options = { method: "DELETE", signal };
   return await fetchJson(url, options);

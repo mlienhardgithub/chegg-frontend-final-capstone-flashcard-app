@@ -13,7 +13,6 @@ export default function Decks() {
 
     return (
         <>
-            <Header />
             <main className="container">
                 <div className="card">
                     <div className="card-body">
