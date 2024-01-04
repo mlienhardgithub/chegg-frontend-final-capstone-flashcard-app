@@ -5,15 +5,9 @@
 
 A local school has decided to put together a flashcard application, Flashcard-o-matic, to help their students study online. Teachers will use this application to create decks of flashcards for the subjects they teach, and students will study the decks. The school needs you to build the application that the students and teachers will use.
 
-## Redux
+## State management (without Redux)
 
-Contains three different slice reducer files:
-
-- decks.slice.js
-- deck.slice.js
-- card.slice.js
-
-The reducers call the local JSON server REST API.
+This branch does not use Redux for state management, but the main branch does use Redux (ignore the reducer slices in the illustrations below).
 
 ## Wireframes of React component structure
 
